@@ -10,6 +10,7 @@ public class Employee : MonoBehaviour, IUnit, ControllableObject
     public string collisionTag;
     [SerializeField]
     private float maxHealth=100f;
+    public float moveSpeed = 2f;
     private float currHealth;
      Dictionary<DamageType, float> Vulnerabilities= new Dictionary<DamageType, float>
     {
@@ -85,6 +86,7 @@ public class Employee : MonoBehaviour, IUnit, ControllableObject
     }
     public void OnMouseUp()
     {
+        Debug.Log("Click");
         if (isControlled)
         {
             isControlled = false;

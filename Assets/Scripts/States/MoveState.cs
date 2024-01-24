@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class MoveState : State
 {
+    private float speed;
+    private Vector3 startPosition;
+    private Vector3 endPosition;
+    private float pathLength;
+    private float totalTimeForPath;
     public MoveState(IUnit unit, StateController controller) : base(unit, controller)
     {
         type = States.Move;
@@ -11,6 +16,8 @@ public class MoveState : State
 
     public override void Enter()
     {
+        //startPosition = _unit.transform.position;
+        //speed = _unit.moveSpeed;
         base.Enter();
     }
     public override void Do()

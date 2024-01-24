@@ -2,12 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using Zenject;
 
 public class CameraController : MonoBehaviour
 {
     [SerializeField]
     Camera _camera;
-    [SerializeField]
+    [Inject]
     private RoomController rooms;
     [SerializeField]
     private Vector3 officePosition;
@@ -24,36 +25,36 @@ public class CameraController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.LeftArrow)&&isUsingCamera)
         {
-            if (currentPosition.leftRoom)
+            if (currentPosition.leftRoom!=null)
             {
-                currentPosition = currentPosition.leftRoom;
+                currentPosition = currentPosition.leftRoom.nextRoom;
                 _camera.transform.position = new Vector3(currentPosition.transform.position.x, currentPosition.transform.position.y, _camera.transform.position.z);
             }
            
         }
         if (Input.GetKeyDown(KeyCode.RightArrow) && isUsingCamera)
         {
-            if (currentPosition.rightRoom)
+            if (currentPosition.rightRoom != null)
             {
-                currentPosition = currentPosition.rightRoom;
+                currentPosition = currentPosition.rightRoom.nextRoom;
                 _camera.transform.position = new Vector3(currentPosition.transform.position.x, currentPosition.transform.position.y, _camera.transform.position.z);
             }
 
         }
         if (Input.GetKeyDown(KeyCode.UpArrow) && isUsingCamera)
         {
-            if (currentPosition.upperRoom)
+            if (currentPosition.upperRoom != null)
             {
-                currentPosition = currentPosition.upperRoom;
+                currentPosition = currentPosition.upperRoom.nextRoom;
                 _camera.transform.position = new Vector3(currentPosition.transform.position.x, currentPosition.transform.position.y, _camera.transform.position.z);
             }
 
         }
         if (Input.GetKeyDown(KeyCode.DownArrow) && isUsingCamera)
         {
-            if (currentPosition.lowerRoom)
+            if (currentPosition.lowerRoom != null)
             {
-                currentPosition = currentPosition.lowerRoom;
+                currentPosition = currentPosition.lowerRoom.nextRoom;
                 _camera.transform.position = new Vector3(currentPosition.transform.position.x, currentPosition.transform.position.y, _camera.transform.position.z);
             }
 

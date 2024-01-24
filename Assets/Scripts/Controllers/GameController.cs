@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using Zenject;
 
 public class GameController : MonoBehaviour
 {
-    [SerializeField]
+    [Inject]
     private RoomController rooms;
     private Employee controledPerson;
     private void Start()

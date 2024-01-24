@@ -3,16 +3,20 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Zenject;
 
 public class Door : MonoBehaviour
 {
     public ConectionType conectionType;
     
     public Room currentRoom;
-    public Room connectedRoom;
+    public Connection connectedRoom;
+    public Door connectedDoor;
+    [Inject]
+    private RoomController controller;
     void Start()
     {
-        
+        currentRoom = GetComponentInParent<Room>();
     }
 
     // Update is called once per frame
@@ -23,36 +27,14 @@ public class Door : MonoBehaviour
     
     private void OnTriggerEnter2D(Collider2D otherCollider)
     {
-        Door[] doors = connectedRoom.GetComponentsInChildren<Door>();
-
-        switch (name)
+        Door[] doors = connectedRoom.nextRoom.GetComponentsInChildren<Door>();
+        foreach(Door door  in doors)
         {
-            case "RightDoor":
-                {
-                    foreach (Door door in doors)
-                    {
-                        if (door.name == "LeftDoor")
-                        {
-                            //connectedDoor = door;
-
-                        }
-                    }
-
-                }
+            if (door.connectedRoom.nextRoom == currentRoom)
+            {
+                connectedDoor = door;
                 break;
-            case "LeftDoor":
-                {
-                    foreach (Door door in doors)
-                    {
-                        if (door.name == "RightDoor")
-                        {
-                            //connectedDoor = door;
-
-                        }
-                    }
-
-                }
-                break;
+            }
         }
         Employee unit = otherCollider.GetComponent<Employee>();
 
@@ -60,10 +42,10 @@ public class Door : MonoBehaviour
         {
             if (unit.controller.currentState.type == States.Move)
             {
-                unit.MoveToRoom(connectedRoom);
-                otherCollider.transform.SetParent(connectedRoom.transform);//івент на входження в кімнату
+                unit.MoveToRoom(connectedRoom.nextRoom);
+                otherCollider.transform.SetParent(connectedRoom.nextRoom.transform);//івент на входження в кімнату
                 unit.controller.ChangeCurrentState(States.Idle);
-                //otherCollider.transform.localPosition = connectedDoor.transform.localPosition;//Логіку дверей в більшості перенести в кімнату.
+                otherCollider.transform.localPosition = connectedDoor.transform.localPosition;//Логіку дверей в більшості перенести в кімнату.
 
             }
         }

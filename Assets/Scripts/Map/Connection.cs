@@ -5,14 +5,13 @@ using UnityEngine;
 public class Connection
 {
     public Dictionary<Room, Door> entrances;
-    public Room firstRoom;
-    public Room secondRoom;
-    public Door firstDoor;
-    public Door secondDoor;//зберігати двері і кімнату в яку ведуть
+    public Room nextRoom;
+    public Door currentDoor;
 
-    public Connection()
+    public Connection(Door door, Room conectedRoom)
     {
-
+        currentDoor = door;
+        nextRoom = conectedRoom;
     }
     public void GetConnection(Room room)
     {
