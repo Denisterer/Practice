@@ -17,10 +17,13 @@ public class CameraController : MonoBehaviour
     void Start()
     {
 
+        
+    }
+    public void Init()
+    {
         currentPosition = rooms.GetFirstRoom();
         _camera.transform.position = officePosition;
     }
-
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.LeftArrow)&&isUsingCamera)

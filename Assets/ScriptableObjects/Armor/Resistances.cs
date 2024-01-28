@@ -6,10 +6,7 @@ using UnityEngine;
 public class Resistances : ScriptableObject
 {
     public float baseArmor;
-    public Resistance iceResistance;
-    public Resistance fireResistance;
-    public Resistance physicResistance;
-    public Resistance corrosionResistance;
+    public List<Resistance> resistances;
     public bool canBeFrosen;
     public bool canBeLitOnFire;
     public bool CanBleed;

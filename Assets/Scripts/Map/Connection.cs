@@ -7,6 +7,8 @@ public class Connection
     public Dictionary<Room, Door> entrances;
     public Room nextRoom;
     public Door currentDoor;
+    public float value = 1f;
+    public bool isChecked = false;
 
     public Connection(Door door, Room conectedRoom)
     {

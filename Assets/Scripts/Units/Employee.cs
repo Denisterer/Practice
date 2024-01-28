@@ -9,24 +9,15 @@ public class Employee : MonoBehaviour, IUnit, ControllableObject
 {
     public string collisionTag;
     [SerializeField]
-    private float maxHealth=100f;
     public float moveSpeed = 2f;
-    private float currHealth;
-     Dictionary<DamageType, float> Vulnerabilities= new Dictionary<DamageType, float>
-    {
-        { DamageType.Fire, 1.2f },
-        { DamageType.Ice, 1.2f },
-        { DamageType.Physical, 1f },
-        { DamageType.Corrosion, 0.8f }
-    };
+    public HealthController healthController;
+    private Resistances armor;//Maybee Inject
     Dictionary<States, State> allStates;
-
+    //SpriteRenderer.Flip!!!!!!!!!!!!!!!!!!!!
     [Inject]
     public StateController controller;
-    private State idleState;
-    private State chaseState;
-    private State attackState;
-    private State moveState;
+    public StateController<Data> controller2;
+
     public bool isControlled { get;  set ;}
     public delegate void OnClickDelegate(Employee controledPerson, StateController controller);
     public event OnClickDelegate OnClick;
@@ -41,19 +32,29 @@ public class Employee : MonoBehaviour, IUnit, ControllableObject
             { States.Attack, new AttackState(this, controller) },
             { States.Move, new MoveState(this, controller) }
         };
+        State idle;
+        allStates.TryGetValue(States.Idle, out idle);
+        controller.Init(States.Idle, allStates);
+
+        controller2 = new StateController<Data>();
+        
+        controller2.AddState<MoveStateT>(States.Move);//all other states
+        controller2.data = new Data { unit=this};
     }
     void Start()
     {
-        State idle;
-        allStates.TryGetValue(States.Idle, out idle);
-        controller.Init(idle, allStates);
-        currHealth = maxHealth;
+        healthController = new HealthController(100f);
+        healthController.OnZeroHealth += ZeroHealthHandler;
     }
 
     // Update is called once per frame
     void Update()
     {
-        controller.currentState.Do();
+        controller.Do();
+    }
+    void ZeroHealthHandler()
+    {
+        Destroy(gameObject);
     }
     //private void OnCollisionEnter2D(Collision2D collision)
     //{
@@ -65,14 +66,23 @@ public class Employee : MonoBehaviour, IUnit, ControllableObject
     //}
     public void TakeDamage(DamageType damageType, float damageValue)
     {
-        if (Vulnerabilities.ContainsKey(damageType))
+        foreach(Resistance resistance in armor.resistances)
         {
-            currHealth -= damageValue * Vulnerabilities[damageType];
+            if(resistance.type == damageType)
+            {
+                damageValue *= resistance.value; break;
+            }
         }
-        else
+        if(damageValue > 0)
         {
-            currHealth -= damageValue;
+            damageValue -= armor.baseArmor;
+            if(damageValue <= 0)
+                {
+                    damageValue = 0;
+                }
         }
+        
+        healthController.ChangeHealth(damageValue);
     }
 
     public void TakeCommand(GameObject target)
@@ -83,6 +93,10 @@ public class Employee : MonoBehaviour, IUnit, ControllableObject
     public void TakeCommand(Vector3 position)
     {
         
+    }
+    public void SetMove()
+    {
+        controller.ChangeCurrentState(States.Move);
     }
     public void OnMouseUp()
     {
@@ -101,8 +115,21 @@ public class Employee : MonoBehaviour, IUnit, ControllableObject
     }
 
     
-    public void MoveToRoom(Room room)
+    public void MoveToRoom(Room room, Vector3 position)
     {
+        controller.ChangeCurrentState(States.Idle);
         transform.SetParent(room.transform);
+        transform.localPosition = position;
+
+    }
+
+    public Transform GetTransform()
+    {
+        return transform;
+    }
+
+    public States GetCurrentState()
+    {
+        return controller.currentState;
     }
 }

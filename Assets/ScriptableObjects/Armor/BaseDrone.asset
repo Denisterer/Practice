@@ -10,22 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7baffa12af312c14bb071c7763e5f145, type: 3}
-  m_Name: BaseHumanResistance
+  m_Name: BaseDrone
   m_EditorClassIdentifier: 
-  baseArmor: 0
-  iceResistance:
-    type: 1
-    value: 1
-  fireResistance:
-    type: 0
-    value: 1
-  physicResistance:
-    type: 2
-    value: 1
-  corrosionResistance:
-    type: 3
+  baseArmor: 5
+  resistances:
+  - type: 0
     value: 0.8
+  - type: 1
+    value: 0.8
+  - type: 2
+    value: 0.5
+  - type: 3
+    value: 2
+  - type: 4
+    value: 0
   canBeFrosen: 1
   canBeLitOnFire: 1
-  CanBleed: 1
-  canBeCorroded: 0
+  CanBleed: 0
+  canBeCorroded: 1

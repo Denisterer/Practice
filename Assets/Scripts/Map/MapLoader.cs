@@ -6,7 +6,7 @@ using System.IO;
 
 public class MapLoader : MonoBehaviour
 {
-    private string filePath = Application.dataPath + "/Config";
+    private string filePath = Path.Combine(Application.streamingAssetsPath, "Config");
     [SerializeField]
     private Vector2 leftTopCellPosition = Vector2.zero;
     private Vector2 currentPosition;
@@ -19,24 +19,23 @@ public class MapLoader : MonoBehaviour
     private Room[,] rooms;
     private Dictionary<Room, string[]> conectionDict = new Dictionary<Room, string[]>();
     [Inject]
-    private RoomController _roomController;
-    [Inject]
     private RoomFactory _roomFactory;
 
-    void Start()
+
+    public (Room[,] rooms, Dictionary<Room, string[]> connectionDicts) Create()
     {
         currentPosition = leftTopCellPosition;
         string[] roomString, properties, connections;
-        data = File.ReadAllLines(filePath + "/" + fileName);
-        rooms = new Room[data.Length,data[0].Split(" ").Length];
-        for(int i = 0; i< data.Length;i++)
+        data = File.ReadAllLines(Path.Combine(filePath, fileName));
+        rooms = new Room[data.Length, data[0].Split(" ").Length];
+        for (int i = 0; i < data.Length; i++)
         {
             currentPosition.x = leftTopCellPosition.x;
             currentPosition.y -= roomShiftY;
             roomString = data[i].Split(" ");
-            for(int j=0;j<roomString.Length;j++)
+            for (int j = 0; j < roomString.Length; j++)
             {
-                
+
                 properties = roomString[j].Split("|");
                 rooms[i, j] = _roomFactory.Create(int.Parse(properties[0]));
                 if (rooms[i, j] == null)
@@ -53,13 +52,7 @@ public class MapLoader : MonoBehaviour
 
             }
         }
-        _roomController.InitAndEstablishConnections(rooms,conectionDict);
-        Debug.Log(data[0]);
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        return (rooms, conectionDict);
     }
 }

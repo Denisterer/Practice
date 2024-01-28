@@ -1,28 +1,60 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using Zenject;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
+using static UnityEngine.ParticleSystem;
 
 public class RoomController : MonoBehaviour
 {
+    [Inject]
+    private MapLoader mapLoader;
     public List<Room> rooms = new List<Room>();
     public List<Connection> connections = new List<Connection>();//кімнати не повинні самі себе додавати в контроллер
     public List<Door> doors;
     void Start()
     {
-        //foreach (Room room in FindObjectsOfType<Room>())
-        //{
-        //    rooms.Add(room);
-        //    //room.OnClick += OnRoomClick;
-        //}
+        (Room[,] rooms, Dictionary<Room, string[]> dictionary) = mapLoader.Create();
+        this.InitAndEstablishConnections(rooms, dictionary);
+        CameraController controller = FindAnyObjectByType<CameraController>();
+        controller.Init();
+    }
+    public (Room nextRoom, Vector3 position) SearchForDestanationPoint(Door door)
+    {
+        Room currentRoom = door.GetComponentInParent<Room>();
+        Vector3 position = Vector3.zero;
+        Connection currentConection = GetConnectionByDoor(door);
+        if (currentConection == null) 
+        {
+            return (currentRoom,door.transform.localPosition);
+        }
+        Room nextRoom = currentConection.nextRoom;
+        foreach (Connection connection in nextRoom.connections)
+        {
+            if (connection.nextRoom == currentRoom) 
+            {
+                position = connection.currentDoor.transform.localPosition;
+            }
+        }
+        return (nextRoom,position);////////Dorobutu
+    }
+    public Connection GetConnectionByDoor(Door door) 
+    {
+        foreach (Connection connection in connections) 
+        {
+            if(connection.currentDoor== door)
+            {
+                return connection;
+            }
+        }
+        return null;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
     public void InitAndEstablishConnections(Room[,] roomMatrix, Dictionary<Room, string[]> connection)
     {
         bool left, right, up, down,isLeftStairs;
@@ -70,6 +102,7 @@ public class RoomController : MonoBehaviour
                     {
                         connectionTMP = new Connection(leftDoor, roomMatrix[i, j - 1]);
                         roomMatrix[i,j].leftRoom = connectionTMP;
+                        roomMatrix[i, j].connections.Add(connectionTMP);
                         connections.Add(connectionTMP);
 
                         leftDoor.connectedRoom = connectionTMP;
@@ -78,6 +111,7 @@ public class RoomController : MonoBehaviour
                     {
                         connectionTMP = new Connection(rightDoor, roomMatrix[i, j + 1]);
                         roomMatrix[i, j].rightRoom = connectionTMP;
+                        roomMatrix[i, j].connections.Add(connectionTMP);
                         connections.Add(connectionTMP);
                         isLeftStairs = true;
 
@@ -98,6 +132,7 @@ public class RoomController : MonoBehaviour
 
                         }
                         roomMatrix[i, j].upperRoom = connectionTMP;
+                        roomMatrix[i, j].connections.Add(connectionTMP);
                         connections.Add(connectionTMP);
                     }
                     if (down)
@@ -115,6 +150,8 @@ public class RoomController : MonoBehaviour
 
                         }
                         roomMatrix[i, j].lowerRoom = connectionTMP;
+                        roomMatrix[i, j].connections.Add(connectionTMP);
+
                         connections.Add(connectionTMP);
                     }
 
@@ -122,9 +159,18 @@ public class RoomController : MonoBehaviour
             }
         }
     }
-    public void AddRoom(Room room)
+    public void ResetSettings()
     {
-        rooms.Add(room);
+        foreach (Connection connection in connections)
+        {
+            connection.isChecked = false;
+            connection.value = 1f;
+        }
+        foreach( Room room in rooms)
+        {
+            room.sum = 0;
+            room.isChecked = false;
+        }
     }
 
     private Door GetDoorByName(Door[] doors, string name)
@@ -142,5 +188,97 @@ public class RoomController : MonoBehaviour
     {
         return rooms[0];
     }
-    
+    private void SetPathModifier(Room room, float positionInRoom)
+    {
+        foreach (Connection connection in connections)
+        {
+            if (connection.currentDoor.name == "LeftDoor")
+            {
+                connection.value += positionInRoom;
+            }
+            else
+            {
+                connection.value-= positionInRoom;
+            }
+        }
+    }
+    public LinkedList<Room> GetShortestPath(Room startRoom, float startPositionX, Room destinationRoom, float destinationPositionX)
+    {
+        SetPathModifier(startRoom,startPositionX);
+        SetPathModifier(destinationRoom, destinationPositionX);
+        LinkedList<Room> resultList = new LinkedList<Room>();
+        List<Room> checkedRooms = new List<Room> { startRoom };
+        if (startRoom == destinationRoom)
+        {
+            Debug.Log("OOf");
+        }
+        startRoom.isChecked = true;
+        while (checkedRooms.Count<rooms.Count)
+        {
+            Debug.Log("Iteration"+checkedRooms.Count);
+            bool check = false;
+            float min = float.MaxValue;
+            float sum;
+            Room linkedRoom = null;
+            Room previous = null;
+
+            for (int i=0;i<checkedRooms.Count;i++)
+            {
+                check = false;
+                foreach (var connection in checkedRooms[i].connections)
+                {
+                    if (!connection.nextRoom.isChecked)
+                    {
+                        sum = checkedRooms[i].sum;
+                        check = true;
+
+                        if (min > sum + connection.value)
+                        {
+                            min = sum + connection.value;
+                            linkedRoom = connection.nextRoom;
+                            previous = checkedRooms[i];
+                        }
+                        
+                    }
+                }
+            }
+            if (check == false)
+            {
+                break;
+            }
+            linkedRoom.isChecked = true;
+            linkedRoom.sum = min;
+            checkedRooms.Add(linkedRoom);
+            foreach(Connection connection in linkedRoom.connections)
+            {
+                if (connection.nextRoom == previous)
+                {
+                    connection.isChecked = true;
+                    break;
+                }
+            }
+            if (linkedRoom == destinationRoom)
+            {
+                Room currentRoom = linkedRoom;
+                resultList.AddFirst(currentRoom);
+                while (currentRoom != startRoom)
+                {
+                    
+                    foreach (var connection in currentRoom.connections)
+                    {
+                        if (connection.isChecked)
+                        {
+                            currentRoom = connection.nextRoom;
+                            break;
+                        }
+                    }
+                    resultList.AddFirst(currentRoom);
+                }
+                break; 
+            }
+            
+        }
+        ResetSettings();
+        return resultList;
+    }
 }

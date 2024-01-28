@@ -8,46 +8,33 @@ public class RoomFactory
 {
     private DiContainer _container;
     private GameObject[] prefabs;
+    private Dictionary<int, string> _roomPrefabs;
+
     public RoomFactory(DiContainer container)
     {
-        this._container = container;
+        _container = container;
         prefabs = Resources.LoadAll<GameObject>("Prefabs/Rooms");
-
+        _roomPrefabs = new Dictionary<int, string>
+        {
+            {1,  "BaseRoom"},
+            {2,  "Coridore"},
+            {3,  "ContaimentRoom"},
+        };
     }
 
     // Update is called once per frame
     public Room Create(int index)
     {
         int prefabIndex=0;
-        switch (index)
-        {
-            case -1:
-                {
-                    return null;
-                }
-            case 1:
-                {
-                    prefabIndex = GetPrefabIndexByName("BaseRoom");
-                }break;
-            case 2:
-                {
-                    prefabIndex = GetPrefabIndexByName("Coridore");
-                }break;
-            case 3:
-                {
-                    prefabIndex = GetPrefabIndexByName("ContaimentRoom");
-                }break;
-            default:
-                {
-                    return null;
-                }
+        if (_roomPrefabs.ContainsKey(index)){
+            prefabIndex = GetPrefabIndexByName(_roomPrefabs[index]);
+            var room = _container.InstantiatePrefabForComponent<Room>(prefabs[prefabIndex]);
+            return room;
         }
-        if (prefabIndex ==-1)
+        else
         {
             return null;
         }
-        var room = _container.InstantiatePrefabForComponent<Room>(prefabs[prefabIndex]);
-        return room;
     }
     private int GetPrefabIndexByName(string name)
     {

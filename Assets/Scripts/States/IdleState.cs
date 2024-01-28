@@ -6,7 +6,6 @@ public class IdleState : State
 {
     public IdleState(IUnit unit, StateController controller) : base(unit, controller)
     {
-        type = States.Idle;
     }
 
     public override void Enter()

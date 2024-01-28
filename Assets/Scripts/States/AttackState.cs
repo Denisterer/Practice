@@ -6,7 +6,6 @@ public class AttackState : State
 {
     public AttackState(IUnit unit, StateController controller) : base(unit, controller)
     {
-        type = States.Attack;
     }
 
     public override void Enter()

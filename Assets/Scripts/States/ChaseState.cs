@@ -6,8 +6,6 @@ public class ChaseState : State
 {
     public ChaseState(IUnit unit, StateController controller) : base(unit, controller)
     {
-        type = States.Chase;
-
     }
 
     public override void Enter()
