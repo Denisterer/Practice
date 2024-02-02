@@ -1,11 +1,16 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 public class UnitSpawner : MonoBehaviour
 {
-    GameObject unitPrefab;
+
+    [Inject]
     IUnitFactory unitFactory;
+    public event Action<IUnit> OnUnitSpawn;
+
     void Start()
     {
         
@@ -18,9 +23,14 @@ public class UnitSpawner : MonoBehaviour
     }
     private void OnMouseUp()
     {
-        if (unitPrefab != null)
+        Room room = GetComponentInParent<Room>();
+        if(room != null )
         {
-            //unitFactory.create(unitPrefab)
+            IUnit unit = unitFactory.Create("Employee", new Pistol(), new Resistances());
+        
+            unit.GetTransform().SetParent(room.transform,false);
+            OnUnitSpawn.Invoke(unit);
         }
+        
     }
 }

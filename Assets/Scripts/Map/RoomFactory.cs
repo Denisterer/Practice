@@ -19,6 +19,7 @@ public class RoomFactory
             {1,  "BaseRoom"},
             {2,  "Coridore"},
             {3,  "ContaimentRoom"},
+            {4,  "EmployeeRoom"},
         };
     }
 

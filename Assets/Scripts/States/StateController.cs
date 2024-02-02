@@ -66,5 +66,9 @@ public class StateController<T>
     {
         allStates[currentState].Do(data);
     }
+    public void OnDoorEnter()
+    {
+        allStates[currentState].OnDoorEnter(data);
+    }
 }
 

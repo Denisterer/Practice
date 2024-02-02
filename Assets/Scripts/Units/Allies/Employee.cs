@@ -7,38 +7,32 @@ using static Unity.VisualScripting.Member;
 
 public class Employee : MonoBehaviour, IUnit, ControllableObject
 {
-    public string collisionTag;
-    [SerializeField]
-    public float moveSpeed = 2f;
     public HealthController healthController;
     private Resistances armor;//Maybee Inject
-    Dictionary<States, State> allStates;
     //SpriteRenderer.Flip!!!!!!!!!!!!!!!!!!!!
-    [Inject]
-    public StateController controller;
+
     public StateController<Data> controller2;
 
     public bool isControlled { get;  set ;}
-    public delegate void OnClickDelegate(Employee controledPerson, StateController controller);
+
+    public float Speed { get; set; } = 2f;
+    public bool canBeDistracted { get; set; } = false;
+    public bool canSwitchRoom { get; set; } = true;
+    public bool canSwitchRoomWithoutCommand { get; set; } = false;
+    public bool canMoveAround { get; set; } = true;
+
+    public delegate void OnClickDelegate(Employee controledPerson);
     public event OnClickDelegate OnClick;
 
     // Start is called before the first frame update
     private void Awake()
     {
-        allStates = new Dictionary<States, State>
-        {
-            { States.Idle, new IdleState(this, controller) },
-            { States.Chase, new ChaseState(this, controller) },
-            { States.Attack, new AttackState(this, controller) },
-            { States.Move, new MoveState(this, controller) }
-        };
-        State idle;
-        allStates.TryGetValue(States.Idle, out idle);
-        controller.Init(States.Idle, allStates);
-
         controller2 = new StateController<Data>();
         
         controller2.AddState<MoveStateT>(States.Move);//all other states
+        controller2.AddState<IdleStateT>(States.Idle);//all other states
+        controller2.AddState<ChaseStateT>(States.Chase);//all other states
+        controller2.AddState<AttackStateT>(States.Attack);//all other states
         controller2.data = new Data { unit=this};
     }
     void Start()
@@ -50,20 +44,13 @@ public class Employee : MonoBehaviour, IUnit, ControllableObject
     // Update is called once per frame
     void Update()
     {
-        controller.Do();
+        controller2.Do();
     }
     void ZeroHealthHandler()
     {
         Destroy(gameObject);
     }
-    //private void OnCollisionEnter2D(Collision2D collision)
-    //{
-    //    if (collision.gameObject.tag == collisionTag)
-    //    {
-    //        Health health = collision.gameObject.GetComponent<Health>();
-    //        health.SetHealth(collisionDamage);
-    //    }
-    //}
+
     public void TakeDamage(DamageType damageType, float damageValue)
     {
         foreach(Resistance resistance in armor.resistances)
@@ -87,16 +74,34 @@ public class Employee : MonoBehaviour, IUnit, ControllableObject
 
     public void TakeCommand(GameObject target)
     {
-       
+        if(target.GetComponent<Abnormality>())
+        {
+            controller2.data.currentTarget = target.GetComponent<Abnormality>();
+            controller2.ChangeCurrentState(States.Chase);
+        }
+        
+
     }
 
     public void TakeCommand(Vector3 position)
     {
         
     }
-    public void SetMove()
+    public void SetMove(LinkedList<Room> rooms, float finalPositionX)
     {
-        controller.ChangeCurrentState(States.Move);
+        controller2.data.finalPositionX = finalPositionX;
+        controller2.data.path = rooms;
+        controller2.data.currentRoom = rooms.First;
+        if(rooms.Count <= 1)
+        {
+            controller2.data.currentDestination = controller2.data.currentRoom.Value;
+        }
+        else
+        {
+            controller2.data.currentDestination = controller2.data.currentRoom.Next.Value;
+        }
+
+        controller2.ChangeCurrentState(States.Move);
     }
     public void OnMouseUp()
     {
@@ -104,23 +109,26 @@ public class Employee : MonoBehaviour, IUnit, ControllableObject
         if (isControlled)
         {
             isControlled = false;
-            OnClick?.Invoke(null, controller);
+            OnClick?.Invoke(null);
         }
         else
         {
             isControlled = true;
-            OnClick?.Invoke(this, controller);
+            OnClick?.Invoke(this);
         }
         
     }
 
     
-    public void MoveToRoom(Room room, Vector3 position)
+    public void MoveToPosition(Vector3 position)
     {
-        controller.ChangeCurrentState(States.Idle);
-        transform.SetParent(room.transform);
+        transform.SetParent(controller2.data.currentDestination.transform);
         transform.localPosition = position;
-
+        controller2.OnDoorEnter();        
+    }
+    public Room GetDestination()
+    {
+        return controller2.data.currentDestination;
     }
 
     public Transform GetTransform()
@@ -130,6 +138,22 @@ public class Employee : MonoBehaviour, IUnit, ControllableObject
 
     public States GetCurrentState()
     {
-        return controller.currentState;
+        return controller2.currentState;
+    }
+
+    public void AddTarget(IUnit target)
+    {
+        if (target is Abnormality)
+        {
+            controller2.data.unitList.Add(target);
+        }
+    }
+
+    public void RemoveTarget(IUnit target)
+    {
+        if(controller2.data.unitList.Contains(target))
+        {
+            controller2.data.unitList.Remove(target);
+        }
     }
 }

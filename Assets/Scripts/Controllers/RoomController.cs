@@ -23,30 +23,29 @@ public class RoomController : MonoBehaviour
         CameraController controller = FindAnyObjectByType<CameraController>();
         controller.Init();
     }
-    public (Room nextRoom, Vector3 position) SearchForDestanationPoint(Door door)
+    public Vector3 SearchForDestanationPoint(Door door, Room destination)
     {
         Room currentRoom = door.GetComponentInParent<Room>();
         Vector3 position = Vector3.zero;
-        Connection currentConection = GetConnectionByDoor(door);
+        Connection currentConection = GetConnection(door, destination);
         if (currentConection == null) 
         {
-            return (currentRoom,door.transform.localPosition);
+            return position;
         }
-        Room nextRoom = currentConection.nextRoom;
-        foreach (Connection connection in nextRoom.connections)
+        foreach (Connection connection in destination.connections)
         {
             if (connection.nextRoom == currentRoom) 
             {
                 position = connection.currentDoor.transform.localPosition;
             }
         }
-        return (nextRoom,position);////////Dorobutu
+        return position;
     }
-    public Connection GetConnectionByDoor(Door door) 
+    public Connection GetConnection(Door door,Room destination) 
     {
         foreach (Connection connection in connections) 
         {
-            if(connection.currentDoor== door)
+            if(connection.currentDoor == door && connection.nextRoom == destination)
             {
                 return connection;
             }
@@ -190,7 +189,7 @@ public class RoomController : MonoBehaviour
     }
     private void SetPathModifier(Room room, float positionInRoom)
     {
-        foreach (Connection connection in connections)
+        foreach (Connection connection in room.connections)
         {
             if (connection.currentDoor.name == "LeftDoor")
             {
@@ -210,12 +209,13 @@ public class RoomController : MonoBehaviour
         List<Room> checkedRooms = new List<Room> { startRoom };
         if (startRoom == destinationRoom)
         {
-            Debug.Log("OOf");
+            resultList.AddFirst(startRoom);
+
+            return resultList;
         }
         startRoom.isChecked = true;
         while (checkedRooms.Count<rooms.Count)
         {
-            Debug.Log("Iteration"+checkedRooms.Count);
             bool check = false;
             float min = float.MaxValue;
             float sum;

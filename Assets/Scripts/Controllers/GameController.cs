@@ -11,29 +11,72 @@ public class GameController : MonoBehaviour
     private Employee controledPerson;
     private void Start()
     {
+        UnitSpawner spawner;
+        BoxSpawner spawner2;
         foreach (Room room in _roomController.rooms)
         {
             room.OnClick += OnRoomClick;
             foreach(Door door in room.doors)
             {
-                door.OnDoorEnter += TransferEmployee;
+                door.OnDoorEnter += TransferUnit;
             }
+            spawner = room.GetComponentInChildren<UnitSpawner>();
+            if (spawner)
+            {
+                spawner.OnUnitSpawn += RegisterUnit;
+            }
+             spawner2 = room.GetComponentInChildren<BoxSpawner>();
+            if (spawner2)
+            {
+                spawner2.OnBoxSpawn += RegisterItem;
+            }
+
         }
         foreach(Employee employee in FindObjectsOfType<Employee>())
         {
             employee.OnClick += OnPersonClick;
         }
     }
-    void TransferEmployee(Door door, IUnit unit)
+    public void RegisterItem(Box box)
     {
-        (Room nextRoom, Vector3 position) = _roomController.SearchForDestanationPoint(door);
-
+        box.OnUnitSpawn += RegisterUnit;
+    }
+    public void RegisterUnit(IUnit unit)
+    {
+        Employee e =  unit as Employee;
+        if (e != null)
+        {
+            e.OnClick += OnPersonClick;
+        }
+        Abnormality a = unit as Abnormality;
+        if (a != null)
+        {
+            a.OnClick += OnAbnoClick;
+        }
+        
+    }
+    void TransferUnit(Door door, IUnit unit)
+    {
+        Room destinationRoom = unit.GetDestination();
+        Room currentRoom = door.GetComponentInParent<Room>();
+        Vector3 position = _roomController.SearchForDestanationPoint(door, destinationRoom);
+        Debug.Log("Try Transfer");
         if (unit != null)
         {
-            if (unit.GetCurrentState() == States.Move)
-            {
+            Debug.Log("Try Transfer2");
 
-                unit.MoveToRoom(nextRoom, position);
+            if (position!=Vector3.zero)
+            {
+                Debug.Log("Try Transfer3");
+                foreach(IUnit unit2 in currentRoom.GetComponentsInChildren<IUnit>()) 
+                {
+                    unit2.RemoveTarget(unit);
+                }
+                foreach (IUnit unit3 in destinationRoom.GetComponentsInChildren<IUnit>())
+                {
+                    unit3.AddTarget(unit);
+                }
+                unit.MoveToPosition(position);
             }
         }
         //unit.stateController.currentState.OnDoorEnter();
@@ -46,6 +89,7 @@ public class GameController : MonoBehaviour
         {
             Debug.Log("TryGetList");
             LinkedList<Room> rooms = _roomController.GetShortestPath(controledPerson.GetComponentInParent<Room>(), controledPerson.transform.localPosition.x, clickedRoom, clickPosition.x);
+            
             Debug.Log("GotList");
             if(rooms != null)
             {
@@ -53,16 +97,17 @@ public class GameController : MonoBehaviour
             }
             foreach (Room room in rooms)
             {
-                Debug.Log(room.transform.position);
+                //Debug.Log(room.transform.position);
             }
             Debug.Log("EndOfPath");
-            controledPerson.SetMove();
-            controledPerson.transform.SetParent(clickedRoom.transform);
-            controledPerson.transform.localPosition = new Vector3(clickPosition.x, clickPosition.y,clickPosition.z);
+            controledPerson.SetMove(rooms,clickPosition.x);
+
+            //controledPerson.transform.SetParent(clickedRoom.transform);
+            //controledPerson.transform.localPosition = new Vector3(clickPosition.x, clickPosition.y,clickPosition.z);
             //Debug.Log(controledPerson.transform.localPosition.ToString());
         }
     }
-    void OnPersonClick(Employee person, StateController controller)
+    void OnPersonClick(Employee person)
     {
         if(controledPerson!=null)
         {
@@ -70,7 +115,14 @@ public class GameController : MonoBehaviour
             
         }
         controledPerson = person;
-        controller.ChangeCurrentState(States.Move);
+    }
+    void OnAbnoClick(GameObject abno)
+    {
+        if (controledPerson != null)
+        {
+            controledPerson.TakeCommand(abno);
+
+        }
     }
 
 }

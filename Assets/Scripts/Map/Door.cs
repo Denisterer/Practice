@@ -19,18 +19,15 @@ public class Door : MonoBehaviour
     {
         currentRoom = GetComponentInParent<Room>();
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
     
     private void OnTriggerEnter2D(Collider2D otherCollider)
     {
         IUnit unit = otherCollider.GetComponent<IUnit>();
-        OnDoorEnter.Invoke(this,unit);
-       
-        //unit.stateController.currentState.OnDoorEnter();
+        OnDoorEnter.Invoke(this,unit);   
+    }
+    private void OnTriggerExit2D(Collider2D otherCollider)
+    {
+        IUnit unit = otherCollider.GetComponent<IUnit>();
+        unit.canSwitchRoom = true;
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +9,8 @@ public class UnitFactory : IUnitFactory
     private DiContainer _container;
     public IUnit Create(string unitType, IWeapon weapon, Resistances armor)
     {
-        var unit = _container.InstantiatePrefabResourceForComponent<Employee>("Prefabs/..."+unitType);
+        Debug.Log("TryCreate");
+        var unit = _container.InstantiatePrefabResourceForComponent<IUnit>("Prefabs/Units/"+unitType);
         return unit;
     }
 

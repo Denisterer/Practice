@@ -2,23 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AttackState : State
+public class AttackStateT : State<Data>
 {
-    public AttackState(IUnit unit, StateController controller) : base(unit, controller)
+    public AttackStateT() : base()
     {
     }
 
-    public override void Enter()
+    public override void Enter(Data data)
     {
-        base.Enter();
+        base.Enter(data);
     }
-    public override void Do()
+    public override void Do(Data data)
     {
-        base.Do();
+        base.Do(data);
     }
-    public override void Exit()
+    public override void Exit(Data data)
     {
-        base.Exit();
+        base.Exit(data);
     }
 
 }

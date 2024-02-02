@@ -39,5 +39,5 @@ public abstract class State<T>
     }
     public virtual void Enter(T data) { }
     public virtual void Exit(T data) { }
-    //public virtual void OnDoorEnter() { }
+    public virtual void OnDoorEnter(T data) { }
 }

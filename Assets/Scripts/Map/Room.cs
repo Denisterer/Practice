@@ -30,14 +30,19 @@ public class Room : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    public Door GetDoorByDestination(Room destination)
     {
-       
+        foreach(Connection connection in connections)
+        {
+            if (connection.nextRoom == destination)
+            {
+                return connection.currentDoor;
+            }
+        }
+        return null;
     }
     private void OnMouseUp()
     {
-        Debug.Log(this.connections.Count);
-
         Vector3 clickPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
         Vector3 localCoordinates = transform.InverseTransformPoint(clickPosition);
