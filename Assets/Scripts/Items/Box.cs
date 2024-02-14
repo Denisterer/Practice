@@ -9,7 +9,9 @@ public class Box : MonoBehaviour
     public event Action<IUnit> OnUnitSpawn;
 
     [Inject]
-    private AbnormalityFactory factory;
+    private AbnormalityFactory abnoFactory;
+    [Inject]
+    private WeaponFactory weaponFactory;
     void Start()
     {
         StartCoroutine(WaitToRelease());
@@ -26,8 +28,10 @@ public class Box : MonoBehaviour
 
         Debug.Log("Заспавнилось");
 
-        IUnit abno = factory.CreateRandom();
+        IUnit abno = abnoFactory.CreateRandom();
+        IWeapon pistol = weaponFactory.Create("Pistol", "HayBullet");
         abno.GetTransform().SetParent(GetComponentInParent<Room>().transform, false);
+        abno.AddWeapon(pistol);
         OnUnitSpawn.Invoke(abno);
         Destroy(gameObject);
 

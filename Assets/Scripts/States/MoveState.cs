@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class MoveState : State
 {
@@ -79,7 +81,7 @@ public class MoveStateT : State<Data>
         }
         pathLength = Vector2.Distance(startPosition, endPosition);
         totalTimeForPath = pathLength / speed;
-        
+        data.unit.SpriteFlip((startPosition - endPosition).x < 0);
         //Debug.Log("Time for path" + totalTimeForPath);
 
     }
@@ -94,13 +96,24 @@ public class MoveStateT : State<Data>
     }
     public override void Do(Data data)
     {
-        //Debug.Log("Start position" + startPosition);
-        //Debug.Log("End position" + endPosition);
         float currentTimeOnPath = Time.time - lastWaypointSwitchTime;
-        //Debug.Log("NextPoss" + Vector2.Lerp(startPosition, endPosition, currentTimeOnPath / totalTimeForPath));
+        if (currentTimeOnPath >=totalTimeForPath) 
+        {
+            data.unit.SetIdle();
+        }
         if(startPosition!=endPosition)
         {
-            data.unit.GetTransform().transform.localPosition = Vector2.Lerp(startPosition, endPosition, currentTimeOnPath / totalTimeForPath);
+            Vector2 position = Vector2.Lerp(startPosition, endPosition, currentTimeOnPath / totalTimeForPath);
+            data.unit.GetTransform().transform.localPosition = position;
+            if (data.currentTarget!=null)
+            {
+                if (data.unit.GetAttackRange() >= Vector2.Distance(data.unit.GetTransform().transform.position, data.currentTarget.GetTransform().position))
+                {
+                    Debug.LogError("Distance " + Vector2.Distance(data.unit.GetTransform().transform.position, data.currentTarget.GetTransform().position) + "range " + data.unit.GetAttackRange());
+
+                    data.unit.SetAttack(data.currentTarget);
+                }
+            }
         }
     }
     public override void Exit(Data data)
@@ -109,23 +122,8 @@ public class MoveStateT : State<Data>
     }
     public override void OnDoorEnter(Data data)
     {
-        //Debug.LogError("current room"+data.currentRoom.Value.transform.position);
-        //Debug.LogError("current destination"+data.currentDestination.transform.position);
-        if (data.currentDestination == null)
-        {
-            Debug.LogError("current Dest is null");
-        }
-        if (data.path.Last.Value == null)
-        {
-            Debug.LogError("last value is null");
-        }
-        if (data.currentRoom.Value == null)
-        {
-            Debug.LogError("Curent room is null");
-        }
-
         data.currentRoom = data.currentRoom.Next;
-        if(data.currentDestination == data.path.Last.Value)//exception
+        if(data.currentDestination == data.path.Last.Value)
         {
             data.currentDestination = data.currentRoom.Value;//exception
         }

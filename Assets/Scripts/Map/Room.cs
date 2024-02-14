@@ -1,9 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
-using Unity.VisualScripting;
 using UnityEngine;
-using Zenject;
 
 public class Room : MonoBehaviour
 {
@@ -17,10 +13,7 @@ public class Room : MonoBehaviour
     public Connection leftRoom = null;
     public Connection rightRoom = null;
     public List<Connection> connections = new List<Connection>();
-    [Inject]
-    private RoomController _roomController;
-    //При створенні отримувати значення і створювати на основі колайдери для дверей
-    public delegate void OnClickDelegate(Vector3 clickPosition, Room clickedRoom);
+    public delegate void OnClickDelegate(float clickPositionX, Room clickedRoom);
     public event OnClickDelegate OnClick;
 
     
@@ -29,7 +22,6 @@ public class Room : MonoBehaviour
         doors = GetComponentsInChildren<Door>();
     }
 
-    // Update is called once per frame
     public Door GetDoorByDestination(Room destination)
     {
         foreach(Connection connection in connections)
@@ -44,11 +36,7 @@ public class Room : MonoBehaviour
     private void OnMouseUp()
     {
         Vector3 clickPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
         Vector3 localCoordinates = transform.InverseTransformPoint(clickPosition);
-
-        OnClick?.Invoke(localCoordinates, this);
+        OnClick?.Invoke(localCoordinates.x, this);
     }
-    
-
 }

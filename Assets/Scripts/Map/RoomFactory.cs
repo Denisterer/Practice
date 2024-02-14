@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using Zenject;
 
@@ -22,13 +20,10 @@ public class RoomFactory
             {4,  "EmployeeRoom"},
         };
     }
-
-    // Update is called once per frame
     public Room Create(int index)
     {
-        int prefabIndex=0;
         if (_roomPrefabs.ContainsKey(index)){
-            prefabIndex = GetPrefabIndexByName(_roomPrefabs[index]);
+            int prefabIndex = GetPrefabIndexByName(_roomPrefabs[index]);
             var room = _container.InstantiatePrefabForComponent<Room>(prefabs[prefabIndex]);
             return room;
         }
@@ -46,5 +41,4 @@ public class RoomFactory
         }
         return -1; 
     }
-    
 }

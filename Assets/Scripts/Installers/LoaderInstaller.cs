@@ -8,6 +8,5 @@ public class LoaderInstaller : MonoInstaller
     public override void InstallBindings()
     {
         Container.Bind<MapLoader>().ToSelf().FromInstance(loader).AsSingle().NonLazy();
-
     }
 }

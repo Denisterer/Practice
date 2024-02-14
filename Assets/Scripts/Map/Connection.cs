@@ -1,10 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public class Connection
 {
-    public Dictionary<Room, Door> entrances;
     public Room nextRoom;
     public Door currentDoor;
     public float value = 1f;
@@ -14,8 +9,5 @@ public class Connection
     {
         currentDoor = door;
         nextRoom = conectedRoom;
-    }
-    public void GetConnection(Room room)
-    {
     }
 }

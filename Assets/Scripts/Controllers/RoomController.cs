@@ -14,12 +14,12 @@ public class RoomController : MonoBehaviour
     [Inject]
     private MapLoader mapLoader;
     public List<Room> rooms = new List<Room>();
-    public List<Connection> connections = new List<Connection>();//кімнати не повинні самі себе додавати в контроллер
+    public List<Connection> connections = new List<Connection>();
     public List<Door> doors;
     void Start()
     {
         (Room[,] rooms, Dictionary<Room, string[]> dictionary) = mapLoader.Create();
-        this.InitAndEstablishConnections(rooms, dictionary);
+        InitAndEstablishConnections(rooms, dictionary);
         CameraController controller = FindAnyObjectByType<CameraController>();
         controller.Init();
     }
@@ -103,8 +103,6 @@ public class RoomController : MonoBehaviour
                         roomMatrix[i,j].leftRoom = connectionTMP;
                         roomMatrix[i, j].connections.Add(connectionTMP);
                         connections.Add(connectionTMP);
-
-                        leftDoor.connectedRoom = connectionTMP;
                     }
                     if (right)
                     {
@@ -114,20 +112,16 @@ public class RoomController : MonoBehaviour
                         connections.Add(connectionTMP);
                         isLeftStairs = true;
 
-                        rightDoor.connectedRoom = connectionTMP;
-
                     }
                     if (up)
                     {
                         if(isLeftStairs)
                         {
                             connectionTMP = new Connection(leftDoor, roomMatrix[i-1, j]);
-                            leftDoor.connectedRoom = connectionTMP;
                         }
                         else
                         {
                             connectionTMP = new Connection(rightDoor, roomMatrix[i-1, j]);
-                            rightDoor.connectedRoom = connectionTMP;
 
                         }
                         roomMatrix[i, j].upperRoom = connectionTMP;
@@ -139,13 +133,11 @@ public class RoomController : MonoBehaviour
                         if (isLeftStairs)
                         {
                             connectionTMP = new Connection(leftDoor, roomMatrix[i + 1, j]);
-                            leftDoor.connectedRoom = connectionTMP;
 
                         }
                         else
                         {
                             connectionTMP = new Connection(rightDoor, roomMatrix[i + 1, j]);
-                            rightDoor.connectedRoom = connectionTMP;
 
                         }
                         roomMatrix[i, j].lowerRoom = connectionTMP;
@@ -200,6 +192,12 @@ public class RoomController : MonoBehaviour
                 connection.value-= positionInRoom;
             }
         }
+    }
+    public Room GetRandomRoom()
+    {
+        System.Random random = new System.Random();
+        int index = random.Next(0, rooms.Count);
+        return rooms[index];
     }
     public LinkedList<Room> GetShortestPath(Room startRoom, float startPositionX, Room destinationRoom, float destinationPositionX)
     {

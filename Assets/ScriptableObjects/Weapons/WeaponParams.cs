@@ -6,6 +6,6 @@ using UnityEngine;
 public class WeaponParams : ScriptableObject
 {
     public float bulletSpeed;
-    public IBullet bulletPrefab;
     public float firerate;
+    public float range;
 }

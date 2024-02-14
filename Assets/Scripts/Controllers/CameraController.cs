@@ -14,11 +14,7 @@ public class CameraController : MonoBehaviour
     private Vector3 officePosition;
     private bool isUsingCamera = false;
     private Room currentPosition;
-    void Start()
-    {
 
-        
-    }
     public void Init()
     {
         currentPosition = rooms.GetFirstRoom();

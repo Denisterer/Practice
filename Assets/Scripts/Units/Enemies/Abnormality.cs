@@ -7,8 +7,13 @@ using UnityEngine;
 
 public class Abnormality : MonoBehaviour, IUnit
 {
-    public event Action<GameObject> OnClick;
+    public event Action<Abnormality> OnClick;
     public event Action<Room> SwitchRoom;
+    public event Action<IUnit> OnDestroy;
+    public event Action<IUnit> OnRandomMove;
+
+
+    public IWeapon weapon;
 
     public HealthController healthController;
     private Resistances armor;
@@ -28,13 +33,17 @@ public class Abnormality : MonoBehaviour, IUnit
     {
         return transform;
     }
+    public Rigidbody2D GetRigidbody()
+    {
+        return GetComponent<Rigidbody2D>();
+    }
 
     public States GetCurrentState()
     {
         return controller2.currentState;
     }
 
-    public void MoveToPosition(Vector3 position)
+    public void MoveToRoom(Vector3 position)
     {
         controller2.data.unitList.Clear();
         controller2.data.unitList = controller2.data.currentDestination.GetComponentsInChildren<Employee>().ToList<IUnit>();
@@ -76,12 +85,15 @@ public class Abnormality : MonoBehaviour, IUnit
     }
     void ZeroHealthHandler()
     {
+        OnDestroy?.Invoke(this);
         Destroy(gameObject);
     }
+
     void Start()
     {
         healthController = new HealthController(100f);
         healthController.OnZeroHealth += ZeroHealthHandler;
+        controller2.ChangeCurrentState(States.Idle);
     }
 
     // Update is called once per frame
@@ -92,7 +104,7 @@ public class Abnormality : MonoBehaviour, IUnit
     public void OnMouseUp()
     {
         Debug.Log("ClickAbno");
-        OnClick?.Invoke(this.GameObject());
+        OnClick?.Invoke(this);
 
     }
     public void AddTarget(IUnit target)
@@ -100,6 +112,12 @@ public class Abnormality : MonoBehaviour, IUnit
         if (target is Employee)
         {
             controller2.data.unitList.Add(target);
+            target.OnDestroy += RemoveTarget;
+            target.OnDestroy += LoseTarget;
+            if (controller2.data.currentTarget == null)
+            {
+                SetAttack(target);
+            }
         }
     }
 
@@ -109,5 +127,89 @@ public class Abnormality : MonoBehaviour, IUnit
         {
             controller2.data.unitList.Remove(target);
         }
+    }
+    public void LoseTarget(IUnit target)
+    {
+        Debug.LogError("LosingTarget");
+        if (controller2.data.currentTarget == target)
+        {
+            Debug.LogError("TargetLost");
+
+            if (controller2.data.unitList.Count > 0)
+            {
+                SetAttack(controller2.data.unitList[0]);
+                RemoveTarget(controller2.data.currentTarget);
+            }
+            else
+            {
+                controller2.data.currentTarget = null;
+            }
+        }
+    }
+
+    public float GetAttackRange()
+    {
+        return weapon.GetRange();
+    }
+
+
+    public void PerformAttack(Vector3 target)
+    {
+        weapon.Shoot(target);
+
+    }
+
+    public void SetMove(LinkedList<Room> rooms, float finalPositionX)
+    {
+        if (rooms == null)
+        {
+
+        }
+        controller2.data.finalPositionX = finalPositionX;
+        controller2.data.path = rooms;
+        controller2.data.currentRoom = rooms.First;
+        if (rooms.Count <= 1)
+        {
+            controller2.data.currentDestination = controller2.data.currentRoom.Value;
+        }
+        else
+        {
+            controller2.data.currentDestination = controller2.data.currentRoom.Next.Value;
+        }
+
+        controller2.ChangeCurrentState(States.Move);
+    }
+
+    public void SetAttack(IUnit target)
+    {
+        controller2.data.currentTarget = target;
+        controller2.ChangeCurrentState(States.Attack);
+    }
+
+    public void SetIdle()
+    {
+        controller2.ChangeCurrentState(States.Idle);
+    }
+
+    public void AddWeapon(IWeapon weapon)
+    {
+        this.weapon = weapon;
+        weapon.GetTransform().SetParent(this.transform, false);
+    }
+    public void AddArmor(Resistances armor)
+    {
+        this.armor = armor;
+    }
+    public void MakeRandomMove()
+    {
+        OnRandomMove?.Invoke(this);
+    }
+    public Room GetCurrentRoom()
+    {
+        return GetComponentInParent<Room>();
+    }
+    public void SpriteFlip(bool isFlipped)
+    {
+        GetComponent<SpriteRenderer>().flipX = isFlipped;
     }
 }

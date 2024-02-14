@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 1365506139421657033}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -9.1, y: -3.7, z: 1}
+  m_LocalPosition: {x: -9.1, y: -3, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -98,9 +98,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38df44d1db2c2e24389d1d4e0075c691, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  conectionType: 0
   currentRoom: {fileID: 0}
-  connectedRoom: {fileID: 0}
   connectedDoor: {fileID: 0}
 --- !u!61 &6460282823274090650
 BoxCollider2D:
@@ -175,7 +173,7 @@ Transform:
   m_GameObject: {fileID: 2604047100454249355}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 9.1, y: -3.7, z: 0}
+  m_LocalPosition: {x: 9.1, y: -3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -245,9 +243,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38df44d1db2c2e24389d1d4e0075c691, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  conectionType: 0
   currentRoom: {fileID: 0}
-  connectedRoom: {fileID: 0}
   connectedDoor: {fileID: 0}
 --- !u!61 &1740726839115269226
 BoxCollider2D:
@@ -402,10 +398,6 @@ MonoBehaviour:
   doors:
   - {fileID: 3070460087068318012}
   - {fileID: 325122756020572118}
-  upperRoom: {fileID: 0}
-  lowerRoom: {fileID: 0}
-  leftRoom: {fileID: 0}
-  rightRoom: {fileID: 0}
 --- !u!61 &4673156466388484471
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -438,7 +430,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -5.4}
+  m_Offset: {x: 0, y: -6}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -449,7 +441,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 19.2, y: 0.7}
+  m_Size: {x: 19.2, y: 2}
   m_EdgeRadius: 0
 --- !u!61 &3829919367615916429
 BoxCollider2D:

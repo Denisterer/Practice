@@ -5,5 +5,5 @@ using UnityEngine;
 public interface IUnitFactory
 {
     // Start is called before the first frame update
-    IUnit Create(string unitType, IWeapon weapon, Resistances armor);
+    IUnit Create(string unitType, string armorType);
 }

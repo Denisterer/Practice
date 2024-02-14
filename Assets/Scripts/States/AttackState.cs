@@ -14,7 +14,19 @@ public class AttackStateT : State<Data>
     }
     public override void Do(Data data)
     {
-        base.Do(data);
+        if (data.currentTarget != null)
+        {
+            float distance = Vector3.Distance(data.unit.GetTransform().position,data.currentTarget.GetTransform().position);
+            Debug.Log("Distance " + distance + "range "+ data.unit.GetAttackRange());
+            if(distance > data.unit.GetAttackRange()) 
+            {
+                LinkedList<Room> rooms = new LinkedList<Room>();
+                rooms.AddFirst(data.currentRoom.Value);
+                data.unit.SetMove(rooms, data.currentTarget.GetTransform().localPosition.x);
+            }
+            data.unit.PerformAttack(data.currentTarget.GetTransform().position);
+        }
+        
     }
     public override void Exit(Data data)
     {

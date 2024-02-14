@@ -7,7 +7,8 @@ using Zenject;
 public class BoxSpawner : MonoBehaviour
 {
     public event Action<Box> OnBoxSpawn;
-
+    [SerializeField]
+    private Transform spawpoint;
     [Inject]
     ItemFactory itemFactory;
 
@@ -23,10 +24,11 @@ public class BoxSpawner : MonoBehaviour
     }
     private void OnMouseUp()
     {
-            Box box = itemFactory.Create("Box");
+        Box box = itemFactory.Create("Box");
+        box.transform.SetParent(transform, false);
+        box.transform.localPosition = spawpoint.localPosition;
 
-            box.transform.SetParent(transform, false);
-            OnBoxSpawn.Invoke(box);
+        OnBoxSpawn.Invoke(box);
 
     }
 }
